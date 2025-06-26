@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    networks:
+      - media-network
+    ports:
+      - "8096:8096"
+    volumes:
+      - ${HOME}/media-stack/jellyfin:/config
+      - ${HOME}/JellyfinMedia/Movies:/movies
+      - jellyfin_cache:/cache
+    environment:
+      - HEALTHCHECK_URL=http://localhost:8096/health
+      - XDG_CACHE_HOME=/cache
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    networks:
+      - media-network
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${HOME}/media-stack/radarr:/config
+      - ${HOME}/media-stack/downloads:/downloads
+      - ${HOME}/JellyfinMedia/Movies:/movies
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    networks:
+      - media-network
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - WEBUI_PORT=8080
+    volumes:
+      - ${HOME}/media-stack/qbittorrent/config:/config
+      - ${HOME}/media-stack/downloads:/downloads
+    restart: unless-stopped
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    networks:
+      - media-network
+    ports:
+      - "9117:9117"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${HOME}/media-stack/jackett:/config
+      - ${HOME}/media-stack/downloads:/downloads
+    restart: unless-stopped
+
+networks:
+  media-network:
+
+volumes:
+  jellyfin_cache:
