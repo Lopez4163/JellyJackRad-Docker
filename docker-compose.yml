@@ -7,19 +7,11 @@ services:
     ports:
       - "8096:8096"
     volumes:
-      - ${HOME}/media-stack/jellyfin:/config
-      - ${HOME}/JellyfinMedia/Movies:/movies
+      - /srv/media-stack/jellyfin:/config
+      - /srv/media/movies:/movies
       - jellyfin_cache:/cache
     environment:
-      - HEALTHCHECK_URL=http://localhost:8096/health
       - XDG_CACHE_HOME=/cache
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     restart: unless-stopped
 
   radarr:
@@ -31,9 +23,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - ${HOME}/media-stack/radarr:/config
-      - ${HOME}/media-stack/downloads:/downloads
-      - ${HOME}/JellyfinMedia/Movies:/movies
+      - /srv/media-stack/radarr:/config
+      - /srv/media/downloads:/downloads
+      - /srv/media/movies:/movies
     restart: unless-stopped
 
   qbittorrent:
@@ -48,8 +40,8 @@ services:
       - PGID=${PGID}
       - WEBUI_PORT=8080
     volumes:
-      - ${HOME}/media-stack/qbittorrent/config:/config
-      - ${HOME}/media-stack/downloads:/downloads
+      - /srv/media-stack/qbittorrent:/config
+      - /srv/media/downloads:/downloads
     restart: unless-stopped
 
   jackett:
@@ -61,8 +53,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - ${HOME}/media-stack/jackett:/config
-      - ${HOME}/media-stack/downloads:/downloads
+      - /srv/media-stack/jackett:/config
+      - /srv/media/downloads:/downloads
     restart: unless-stopped
 
 volumes:
